@@ -27,6 +27,8 @@ PointToPointRouterImpl::~PointToPointRouterImpl()
 {
 }
 
+
+//A* Star Implementation of Route Finding
 DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(
         const GeoCoord& start,
         const GeoCoord& end,
@@ -41,21 +43,36 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(
 	if (!(m_streetMap->getSegmentsThatStartWith(start, containsStEnd)) || !(m_streetMap->getSegmentsThatStartWith(end, containsStEnd)))	//if start or end is not in map, it is a bad coord
 		return BAD_COORD;
 	
-	pair<double, GeoCoord> startPoint;
-	startPoint.first = distanceEarthMiles(start, end);
-	startPoint.second = start;
-	priority_queue < pair<double, GeoCoord>, vector<pair<double, GeoCoord>>, greater<pair<double, GeoCoord>> > routeQueue;	//uses a priority queue based on smallest double value
-	routeQueue.push(startPoint);	//add first value to queue
-
+	//f-value, location
+	priority_queue < pair<double, GeoCoord>, vector<pair<double, GeoCoord>>, greater<pair<double, GeoCoord>> > openLocations;
+	//current location : previous location 
 	ExpandableHashMap<GeoCoord, GeoCoord> routeMap;
-	while (!routeQueue.empty())
+	//location : cost from start
+	ExpandableHashMap<GeoCoord, double> totalCosts;
+
+	// g is the total distance to get to the location
+	double g = 0;
+	// f = g + distance to end
+	double f = 0;
+	GeoCoord currentLoc;
+	pair<double, GeoCoord> priorityPair;
+	priorityPair.first = f;
+	priorityPair.second = start;
+	totalCosts.associate(start, g);
+	openLocations.push(priorityPair);
+
+	vector<StreetSegment> nextSegments;
+	GeoCoord nextLoc;
+	double* oldGVal;
+
+	while (!openLocations.empty())
 	{
-		GeoCoord current = routeQueue.top().second;
-		routeQueue.pop();
-		if (current == end)	//if end found, retrieve route to get there
+		currentLoc = openLocations.top().second;
+		openLocations.pop();
+		if (currentLoc == end)	//if end found, retrieve route to get there
 		{
 			GeoCoord previous;
-			GeoCoord currentCoord = current;
+			GeoCoord currentCoord = currentLoc;
 			while (previous != start)
 			{
 				previous = *(routeMap.find(currentCoord));
@@ -78,23 +95,29 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(
 			}
 			return DELIVERY_SUCCESS;
 		}
-
-		vector<StreetSegment> connecters;
-		m_streetMap->getSegmentsThatStartWith(current, connecters);	
-		for (int i = 0; i < connecters.size(); i++)
+		
+		//get all connected street segments
+		m_streetMap->getSegmentsThatStartWith(currentLoc, nextSegments);
+		for (int i = 0; i < nextSegments.size(); i++)
 		{
-			if (routeMap.find(connecters[i].end) == nullptr)	//if point has already been visited, do not return to it
+			nextLoc = nextSegments[i].end;
+
+			g = *(totalCosts.find(currentLoc)) + distanceEarthMiles(currentLoc, nextLoc);
+
+			oldGVal = totalCosts.find(nextLoc);
+			//if this location has not yet been visited or is better than the previous route, process it
+			if (oldGVal == nullptr || (g < *oldGVal))
 			{
-				routeMap.associate(connecters[i].end, current);	//associate geocoord ends with beginnings
-				pair<double, GeoCoord> newStreetCoord;
-				newStreetCoord.first = distanceEarthMiles(connecters[i].end, end);
-				newStreetCoord.second = connecters[i].end;
-				routeQueue.push(newStreetCoord);	//push new coord onto the queue
+				routeMap.associate(nextLoc, currentLoc);
+				//record the g value to get to Loc
+				totalCosts.associate(nextLoc, g);
+				f = g + distanceEarthMiles(nextLoc, end);
+				priorityPair.first = f;
+				priorityPair.second = nextLoc;
+				openLocations.push(priorityPair);
 			}
 		}
 	}
-	
-
     return NO_ROUTE;
 }
 

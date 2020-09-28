@@ -70,6 +70,13 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(
 	double coolingRate = 0.003;
 
 	oldCrowDistance = getDistance(deliveries, depot);
+
+	if (deliveries.size() <= 1)
+	{
+		newCrowDistance = oldCrowDistance;
+		return;
+	}
+
 	vector<DeliveryRequest> currentRoute = deliveries;
 	vector<DeliveryRequest> optimizedDeliveries = currentRoute;
 
@@ -98,6 +105,7 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(
 		if (getDistance(currentRoute, depot) < getDistance(optimizedDeliveries, depot))
 			optimizedDeliveries = currentRoute;
 
+		//cool the system
 		temp *= 1 - coolingRate;
 	}
 
