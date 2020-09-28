@@ -9,10 +9,10 @@ PointToPointRouter.cpp, StreetMap.cpp, and DeliverPlanner.cpp except for a few
 wrapper/delegating functions. 
 
 ExpandableHashMap.h: Generic HashMap class using templates to hold any type of data
-StreetMap.cpp: Reads in mapdata file into a ExpandableHashMap
-PointToPointRouter.cpp: Uses A* algorithm to generate route to given location
-DeliveryOptimizer.cpp: Uses Simulated Anneling algorithm to optimize the order of deliveries
-DeliverPlanner.cpp: Translates optimized routes of streetsegments into proceed, turn, and deliver text commands
+StreetMap.cpp: Reads in mapdata file into a ExpandableHashMap  
+PointToPointRouter.cpp: Uses A* algorithm to generate route to given location  
+DeliveryOptimizer.cpp: Uses Simulated Anneling algorithm to optimize the order of deliveries  
+DeliverPlanner.cpp: Translates optimized routes of streetsegments into proceed, turn, and deliver text commands  
 
 ## Usage:
 
