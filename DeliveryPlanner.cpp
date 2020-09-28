@@ -52,7 +52,7 @@ DeliveryResult DeliveryPlannerImpl::generateDeliveryPlan(
 	GeoCoord start = depot;
 	double distance = 0;
 	vector<list<StreetSegment>> totalRoute;
-	for (int i = 0; i < deliveries.size(); i++)		//ensure that deliviers are valid, and push them onto a vector to be processed
+	for (int i = 0; i < deliveries.size(); i++)		//ensure that deliveries are valid, and push them onto a vector to be processed
 	{
 		DeliveryResult deliveryCheck;
 		deliveryCheck = m_pathFinder->generatePointToPointRoute(start, optimizedDeliveries[i].location, deliveryRoute, distance);
